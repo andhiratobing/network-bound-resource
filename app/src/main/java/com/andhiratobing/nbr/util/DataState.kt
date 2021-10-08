@@ -1,9 +1,15 @@
 package com.andhiratobing.nbr.util
 
-sealed class DataState<out T> {
+import retrofit2.Response
 
-    data class Success<out T>(val data: T) : DataState<T>()
-    data class Error(val exception: Exception) : DataState<Nothing>()
-    object Loading : DataState<Nothing>()
+sealed class DataState<T>(
+    val data: T? = null,
+    val errorBody: Response<Any>? = null,
+    val isNetworkError: Boolean? = null
+) {
+    class Success<T>(data: T) : DataState<T>(data)
+    class Loading<T>(data: T? = null) : DataState<T>(data)
+    class Error<T>(isNetworkError: Boolean, errorBody: Response<Any>?, data: T? = null) :
+        DataState<T>(data, errorBody, isNetworkError)
 
 }
