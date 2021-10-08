@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.andhiratobing.nbr.R
 import com.andhiratobing.nbr.data.model.User
 import com.andhiratobing.nbr.databinding.ItemUserBinding
 import com.bumptech.glide.Glide
@@ -17,7 +18,11 @@ class UserAdapter : ListAdapter<User, UserAdapter.UserViewHolder>(USER_COMPARATO
             binding.apply {
                 tvUsername.text = user.username
                 tvGender.text = user.gender
-                Glide.with(itemView).load(user.avatarUser).into(ivAvatar)
+                Glide.with(itemView)
+                    .load(user.avatarUser)
+                    .centerCrop()
+                    .error(R.drawable.ic_image_not_found)
+                    .into(ivAvatar)
             }
         }
     }

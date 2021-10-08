@@ -1,16 +1,16 @@
 package com.andhiratobing.nbr.view
 
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.andhiratobing.nbr.adapter.UserAdapter
-import com.andhiratobing.nbr.data.model.User
 import com.andhiratobing.nbr.databinding.ActivityMainBinding
 import com.andhiratobing.nbr.util.DataState
-import com.andhiratobing.nbr.util.StateEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -24,79 +24,34 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
+        initAdapter()
         initObserver()
-        mainViewModel.setStateEvent(StateEvent.Event)
+        getDataUserRandom()
+    }
+
+    private fun getDataUserRandom() {
+        lifecycleScope.launch {
+            mainViewModel.setUserRandom()
+        }
     }
 
     private fun initObserver() {
-        mainViewModel.dataState.observe(this, {
-            when (it) {
-                is DataState.Loading -> {
-                    showProgressBar(true)
-                }
-                is DataState.Success<List<User>> -> {
-                    showProgressBar(false)
-                    getDataUser(it.data)
-                }
-                is DataState.Error -> {
-
-                    showError(it.exception.message)
-                }
-            }
-        })
+        binding.apply {
+            mainViewModel.getUserLiveData.observe(this@MainActivity, {
+                it.data?.let { listUser -> userAdapter.submitList(listUser) }
+                progressBar.isVisible = it is DataState.Loading && it.data.isNullOrEmpty()
+                tvMessageError.isVisible = it is DataState.Error && it.data.isNullOrEmpty()
+                tvMessageError.text = it.errorBody?.message()
+            })
+        }
     }
 
-    private fun getDataUser(user: List<User>) {
+    private fun initAdapter() {
         binding.apply {
             rvUser.layoutManager =
                 LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
             userAdapter = UserAdapter()
             rvUser.adapter = userAdapter
-            userAdapter.submitList(user as ArrayList)
-        }
-
-    }
-
-    private fun showProgressBar(state: Boolean) {
-        binding.apply {
-            progressBar.visibility = if (state) View.VISIBLE else View.GONE
-        }
-    }
-
-    private fun showError(message: String?) {
-        binding.apply {
-            tvMessageError.text = message
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
