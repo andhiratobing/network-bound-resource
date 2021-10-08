@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.andhiratobing.nbr.data.local.entities.UserEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
@@ -13,5 +14,5 @@ interface UserDao {
     suspend fun insertUser(userEntity: UserEntity): Long
 
     @Query("SELECT * FROM users")
-    suspend fun getUser(): List<UserEntity>
+    fun getUser(): Flow<List<UserEntity>>
 }
