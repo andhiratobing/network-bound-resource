@@ -7,10 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.andhiratobing.nbr.data.model.User
 import com.andhiratobing.nbr.data.repositories.MainRepository
 import com.andhiratobing.nbr.util.DataState
-import com.andhiratobing.nbr.util.StateEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,24 +17,15 @@ class MainViewModel @Inject constructor(
     private val mainRepository: MainRepository
 ) : ViewModel() {
 
-    private var _dataState: MutableLiveData<DataState<List<User>>> = MutableLiveData()
-    val dataState: LiveData<DataState<List<User>>> get() = _dataState
+    private var _getUserMutableLiveData: MutableLiveData<DataState<List<User>>> = MutableLiveData()
+    val getUserLiveData: LiveData<DataState<List<User>>> get() = _getUserMutableLiveData
 
-    fun setStateEvent(stateEvent: StateEvent) {
+    fun setUserRandom() {
         viewModelScope.launch {
-            when (stateEvent) {
-                is StateEvent.Event -> {
-                    mainRepository.getUser().onEach {
-                        _dataState.value = it
-                    }.launchIn(viewModelScope)
-                }
-
-                is StateEvent.None -> {
-
-                }
+            mainRepository.getUser().collect {
+                _getUserMutableLiveData.value = it
             }
         }
     }
-
 
 }
